@@ -14,27 +14,29 @@ router.post('/signup', (req, res)=>{
     res.json({ result: false, error: 'Missing or empty fields'});
     return;
   }
-
   // Check si le user n'est pas déjà enregistré
   User.findOne({ username: req.body.username })
     .then(data => {
-    if(data){
-       res.json({ result: false, error: 'User already exists' });
-    } else {
+      if(data){
+        res.json({ result: false, error: 'User already exists' });
+      } else {
   // Enregistrer le new user
-      const hash = bcrypt.hashSync(req.body.password, 10);
+        const hash = bcrypt.hashSync(req.body.password, 10);
 
-      const newUser = new User({
-        username: req.body.username,
-        firstname: req.body.firstname,
-        password: hash,
-        token: uid2(32),
-      });
-     newUser.save().then(newDoc => {
-        res.json({ result: true, token: newDoc.token });
-      });     
-    }
-  });
+        const newUser = new User({
+          username: req.body.username,
+          firstname: req.body.firstname,
+          password: hash,
+          token: uid2(32),
+        });
+        newUser.save().then(newDoc => {
+          res.json({ result: true, token: newDoc.token });
+        });     
+      }
+    })
+    .catch(err => {
+      res.json({ result: false, error: 'Server error' });
+    });
 });
 
 
@@ -48,13 +50,15 @@ router.post('/signin', (req, res)=>{
   // S'assurer si le user existe dans la BDD
   User.findOne({ username: req.body.username })
     .then(data => {
-    if(data && bcrypt.compareSync(req.body.password, data.password)){
-       res.json({ result: true, token: data.token });
-    } else {
-       res.json({ result: false, error: 'User not found' });
-    }
-});
-
+      if(data && bcrypt.compareSync(req.body.password, data.password)){
+        res.json({ result: true, token: data.token });
+      } else {
+        res.json({ result: false, error: 'User not found' });
+      }
+    })
+    .catch(err => {
+      res.json({ result: false, error: 'Server error' });
+      });
 })
 
 // GET user connecté by token
@@ -63,8 +67,11 @@ router.get('/isConnected/:token', function(req, res, next) {
     if (!data) {
       res.json({ result: false, error: 'User not found' });
     } 
-      res.json({ result: true, token: data.token });
+    res.json({ result: true, token: data.token });
+  })
+  .catch(err => {
+    res.json({ result: false, error: 'Server error' });
   });
-});
+})
 
 module.exports = router;
