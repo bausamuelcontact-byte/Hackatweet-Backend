@@ -67,7 +67,7 @@ router.get('/isConnected/:token', function(req, res, next) {
     if (!data) {
       res.json({ result: false, error: 'User not found' });
     } 
-    res.json({ result: true, token: data.token });
+    res.json({ result: true, token: data.token, firstname: data.firstname, username: data.username});
   })
   .catch(err => {
     res.json({ result: false, error: 'Server error' });
