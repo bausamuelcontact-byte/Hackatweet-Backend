@@ -27,7 +27,8 @@ router.post('/create', (req, res)=>{
 
 // Afficher tous les tweets
 router.get('/',(req, res)=>{
-    Tweet.find().then(data => {
+    Tweet.find().populate('user')
+    .then(data => {
         res.json(data)
     })
     .catch(err => {
